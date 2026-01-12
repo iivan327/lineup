@@ -8,7 +8,11 @@
 content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <style>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
 body {
   margin: 0;
@@ -26,7 +30,6 @@ body {
 .panel {
   padding: 10px;
   background: white;
-  overflow: hidden;
 }
 
 .roster {
@@ -39,18 +42,17 @@ body {
 }
 
 h2 {
-  margin: 5px 0;
-  font-size: 18px;
+  margin: 6px 0;
+  font-size: 16px;
 }
 
 .list {
   height: calc(100% - 30px);
-  overflow: hidden;
 }
 
 .item {
   background: #e5e5e5;
-  padding: 10px;
+  padding: 12px;
   margin: 6px 0;
   border-radius: 6px;
   text-align: center;
@@ -63,21 +65,30 @@ h2 {
   gap: 6px;
 }
 
-.slot span {
+.order {
   width: 18px;
   font-weight: bold;
 }
 
 .name {
   flex: 1;
+  background: #dcdcdc;
+  padding: 6px;
+  border-radius: 4px;
 }
 
-select {
-  font-size: 14px;
+.dragging {
+  opacity: 0.4;
 }
 
-.pitcher {
-  margin-top: 10px;
+.ghost {
+  position: fixed;
+  pointer-events: none;
+  background: #bbb;
+  padding: 10px;
+  border-radius: 6px;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
 }
 </style>
 </head>
@@ -86,20 +97,18 @@ select {
 
 <div class="app">
 
-  <!-- ROSTER -->
   <div class="panel roster">
     <h2>Roster</h2>
     <div class="list" id="roster"></div>
   </div>
 
-  <!-- LINEUP -->
   <div class="panel lineup">
-    <h2>Lineup 1–9</h2>
+    <h2>Lineup</h2>
     <div class="list" id="lineup"></div>
 
     <h2>投手</h2>
-    <div class="item slot" data-pitcher>
-      <span>P</span>
+    <div class="item slot drop">
+      <div class="order">P</div>
       <div class="name"></div>
     </div>
   </div>
@@ -113,16 +122,15 @@ const rosterNames = [
   "鄭宗哲","J Long","江坤宇","吳念庭"
 ];
 
-const positions = ["","P","C","1B","2B","3B","SS","LF","CF","RF","DH"];
-
-let dragging = null;
+let dragged = null;
+let ghost = null;
 
 function createRoster() {
   const r = document.getElementById("roster");
-  rosterNames.forEach(n => {
+  rosterNames.forEach(name => {
     const d = document.createElement("div");
-    d.className = "item";
-    d.textContent = n;
+    d.className = "item drag";
+    d.textContent = name;
     enableDrag(d);
     r.appendChild(d);
   });
@@ -132,39 +140,62 @@ function createLineup() {
   const l = document.getElementById("lineup");
   for (let i = 1; i <= 9; i++) {
     const d = document.createElement("div");
-    d.className = "item slot";
+    d.className = "item slot drop";
     d.innerHTML = `
-      <span>${i}</span>
+      <div class="order">${i}</div>
       <div class="name"></div>
-      <select>${positions.map(p=>`<option>${p}</option>`).join("")}</select>
     `;
-    enableDrop(d);
     l.appendChild(d);
   }
 }
 
 function enableDrag(el) {
   el.addEventListener("pointerdown", e => {
-    dragging = el;
+    dragged = el;
+    el.classList.add("dragging");
+
+    ghost = el.cloneNode(true);
+    ghost.className = "ghost";
+    document.body.appendChild(ghost);
+
+    moveGhost(e);
     el.setPointerCapture(e.pointerId);
   });
 
-  el.addEventListener("pointerup", () => dragging = null);
-}
+  el.addEventListener("pointermove", e => {
+    if (ghost) moveGhost(e);
+  });
 
-function enableDrop(el) {
-  el.addEventListener("pointerup", () => {
-    if (!dragging) return;
-    const nameBox = el.querySelector(".name");
-
-    const temp = nameBox.textContent;
-    nameBox.textContent = dragging.textContent;
-    dragging.textContent = temp || dragging.textContent;
-
-    if (!temp) dragging.remove();
-    dragging = null;
+  el.addEventListener("pointerup", e => {
+    el.classList.remove("dragging");
+    if (ghost) ghost.remove();
+    ghost = null;
+    dragged = null;
   });
 }
+
+function moveGhost(e) {
+  ghost.style.left = e.clientX + "px";
+  ghost.style.top = e.clientY + "px";
+}
+
+document.addEventListener("pointerup", e => {
+  if (!dragged) return;
+
+  const target = document.elementFromPoint(e.clientX, e.clientY);
+  const drop = target?.closest(".drop");
+  if (!drop) return;
+
+  const nameBox = drop.querySelector(".name");
+  if (nameBox.textContent) {
+    const temp = nameBox.textContent;
+    nameBox.textContent = dragged.textContent;
+    dragged.textContent = temp;
+  } else {
+    nameBox.textContent = dragged.textContent;
+    dragged.remove();
+  }
+});
 
 createRoster();
 createLineup();
