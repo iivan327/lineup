@@ -2,160 +2,173 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<title>棒球棒次排版</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>棒球棒次表</title>
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <style>
-  body {
-    font-family: system-ui;
-    background: #f2f2f2;
-    padding: 15px;
-  }
-  h2 { margin-top: 0; }
-  .container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  @media (min-width: 800px) {
-    .container { flex-direction: row; }
-  }
-  .box {
-    background: white;
-    padding: 12px;
-    border-radius: 8px;
-    flex: 1;
-  }
-  ul {
-    list-style: none;
-    padding: 0;
-    min-height: 100px;
-    border: 1px dashed #ccc;
-    border-radius: 6px;
-  }
-  li {
-    background: #e8e8e8;
-    padding: 8px;
-    margin: 6px;
-    border-radius: 4px;
-  }
-  .player {
-    cursor: pointer;
-  }
-  .slot {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  select {
-    flex-shrink: 0;
-  }
-  input {
-    width: 100%;
-    padding: 6px;
-    margin-bottom: 6px;
-  }
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  font-family: system-ui;
+  background: #f3f3f3;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+.panel {
+  padding: 10px;
+  background: white;
+  overflow: hidden;
+}
+
+.roster {
+  width: 40%;
+  border-right: 2px solid #ddd;
+}
+
+.lineup {
+  width: 60%;
+}
+
+h2 {
+  margin: 5px 0;
+  font-size: 18px;
+}
+
+.list {
+  height: calc(100% - 30px);
+  overflow: hidden;
+}
+
+.item {
+  background: #e5e5e5;
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 6px;
+  text-align: center;
+  touch-action: none;
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.slot span {
+  width: 18px;
+  font-weight: bold;
+}
+
+.name {
+  flex: 1;
+}
+
+select {
+  font-size: 14px;
+}
+
+.pitcher {
+  margin-top: 10px;
+}
 </style>
 </head>
 
 <body>
-<h1>⚾ 棒次 / 守位表</h1>
 
-<div class="container">
+<div class="app">
+
   <!-- ROSTER -->
-  <div class="box">
-    <h2>Roster（點選加入）</h2>
-    <input id="playerInput" placeholder="輸入球員名字">
-    <button onclick="addPlayer()">加入</button>
-    <ul id="roster"></ul>
+  <div class="panel roster">
+    <h2>Roster</h2>
+    <div class="list" id="roster"></div>
   </div>
 
   <!-- LINEUP -->
-  <div class="box">
+  <div class="panel lineup">
     <h2>Lineup 1–9</h2>
-    <ul id="lineup"></ul>
+    <div class="list" id="lineup"></div>
 
-    <h2>投手（第10人）</h2>
-    <ul id="pitcher"></ul>
+    <h2>投手</h2>
+    <div class="item slot" data-pitcher>
+      <span>P</span>
+      <div class="name"></div>
+    </div>
   </div>
+
 </div>
 
 <script>
-const positions = ["", "P","C","1B","2B","3B","SS","LF","CF","RF","DH"];
-let dragged = null;
+const rosterNames = [
+  "陳晨威","陳傑憲","S Fairchild","柯敬賢","宋晟睿",
+  "林安可","邱志呈","林子偉","張育成","李灝宇",
+  "鄭宗哲","J Long","江坤宇","吳念庭"
+];
 
-function addPlayer() {
-  const input = document.getElementById("playerInput");
-  if (!input.value) return;
+const positions = ["","P","C","1B","2B","3B","SS","LF","CF","RF","DH"];
 
-  const li = document.createElement("li");
-  li.textContent = input.value;
-  li.className = "player";
-  li.draggable = true;
+let dragging = null;
 
-  li.onclick = () => autoAssign(li);
-  li.ondragstart = () => dragged = li;
-
-  document.getElementById("roster").appendChild(li);
-  input.value = "";
-}
-
-function createSlot(order) {
-  const li = document.createElement("li");
-  li.className = "slot";
-  li.ondragover = e => e.preventDefault();
-  li.ondrop = () => {
-    if (dragged) fillSlot(li, dragged);
-  };
-
-  li.innerHTML = `
-    <strong>${order}</strong>
-    <span class="name"></span>
-    ${createSelect()}
-  `;
-  return li;
-}
-
-function createSelect() {
-  let html = `<select>`;
-  positions.forEach(p => {
-    html += `<option value="${p}">${p}</option>`;
+function createRoster() {
+  const r = document.getElementById("roster");
+  rosterNames.forEach(n => {
+    const d = document.createElement("div");
+    d.className = "item";
+    d.textContent = n;
+    enableDrag(d);
+    r.appendChild(d);
   });
-  html += `</select>`;
-  return html;
 }
 
-function fillSlot(slot, player) {
-  slot.querySelector(".name").textContent = player.textContent;
-  player.remove();
-  dragged = null;
-}
-
-function autoAssign(player) {
-  const slots = document.querySelectorAll("#lineup .slot");
-  for (let s of slots) {
-    if (!s.querySelector(".name").textContent) {
-      fillSlot(s, player);
-      return;
-    }
-  }
-  // 投手格
-  const p = document.getElementById("pitcher");
-  if (!p.firstChild) {
-    const li = document.createElement("li");
-    li.textContent = player.textContent;
-    p.appendChild(li);
-    player.remove();
-  }
-}
-
-function init() {
-  const lineup = document.getElementById("lineup");
+function createLineup() {
+  const l = document.getElementById("lineup");
   for (let i = 1; i <= 9; i++) {
-    lineup.appendChild(createSlot(i));
+    const d = document.createElement("div");
+    d.className = "item slot";
+    d.innerHTML = `
+      <span>${i}</span>
+      <div class="name"></div>
+      <select>${positions.map(p=>`<option>${p}</option>`).join("")}</select>
+    `;
+    enableDrop(d);
+    l.appendChild(d);
   }
 }
 
-init();
+function enableDrag(el) {
+  el.addEventListener("pointerdown", e => {
+    dragging = el;
+    el.setPointerCapture(e.pointerId);
+  });
+
+  el.addEventListener("pointerup", () => dragging = null);
+}
+
+function enableDrop(el) {
+  el.addEventListener("pointerup", () => {
+    if (!dragging) return;
+    const nameBox = el.querySelector(".name");
+
+    const temp = nameBox.textContent;
+    nameBox.textContent = dragging.textContent;
+    dragging.textContent = temp || dragging.textContent;
+
+    if (!temp) dragging.remove();
+    dragging = null;
+  });
+}
+
+createRoster();
+createLineup();
 </script>
+
 </body>
 </html>
