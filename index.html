@@ -1,268 +1,211 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<title>棒球棒次表</title>
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>棒球打序</title>
 
 <style>
 * {
   box-sizing: border-box;
-  -webkit-user-select: none;
   user-select: none;
+  -webkit-user-select: none;
   touch-action: none;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-body {
+html, body {
   margin: 0;
-  height: 100vh;
+  padding: 0;
+  height: 100%;
   overflow: hidden;
-  font-family: system-ui;
-  background: #f3f3f3;
+  background: #111;
+  color: #fff;
 }
 
-.app {
+.container {
   display: flex;
-  height: 100vh;
+  height: 100%;
 }
 
-.panel {
-  padding: 10px;
-  background: white;
+.roster, .lineup {
+  width: 50%;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.roster {
-  width: 40%;
-  border-right: 2px solid #ddd;
-}
-
-.lineup {
-  width: 60%;
-}
-
-h2 {
-  margin: 6px 0;
-  font-size: 16px;
-}
-
-.list {
-  height: calc(100% - 28px);
+.title {
+  text-align: center;
+  font-weight: bold;
 }
 
 .item {
-  background: #e5e5e5;
-  padding: 12px;
-  margin: 6px 0;
-  border-radius: 6px;
+  background: #333;
+  padding: 10px;
+  border-radius: 8px;
   text-align: center;
+  font-size: 16px;
+}
+
+.dragging {
+  opacity: 0.3;
 }
 
 .slot {
+  background: #222;
+  border: 1px dashed #555;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
 .order {
-  width: 18px;
+  width: 24px;
+  text-align: center;
   font-weight: bold;
 }
 
 .name {
   flex: 1;
-  background: #dcdcdc;
-  padding: 6px;
-  border-radius: 4px;
 }
 
 select {
-  font-size: 14px;
-}
-
-.ghost {
-  position: fixed;
-  pointer-events: none;
-  background: #bdbdbd;
-  padding: 10px;
+  background: #444;
+  color: #fff;
+  border: none;
   border-radius: 6px;
-  transform: translate(-50%, -50%);
-  z-index: 9999;
+  padding: 4px;
 }
 </style>
 </head>
 
 <body>
-
-<div class="app">
-
-  <!-- ROSTER -->
-  <div class="panel roster drop" id="roster">
-    <h2>Roster</h2>
-    <div class="list"></div>
+<div class="container">
+  <div class="roster" id="roster">
+    <div class="title">Roster</div>
   </div>
 
-  <!-- LINEUP -->
-  <div class="panel lineup">
-    <h2>Lineup 1–9</h2>
-    <div class="list" id="lineup"></div>
-
-    <h2>投手（第10人）</h2>
-    <div class="item slot drop" data-pitcher>
-      <div class="order">P</div>
-      <div class="name"></div>
-      <select><option>P</option></select>
-    </div>
+  <div class="lineup" id="lineup">
+    <div class="title">Lineup</div>
   </div>
-
 </div>
 
 <script>
-document.addEventListener("dblclick", e => e.preventDefault());
-
 const rosterNames = [
   "陳晨威","陳傑憲","S Fairchild","柯敬賢","宋晟睿",
-  "林安可","邱智呈","林子偉","張育成","李灝宇",
-  "鄭宗哲","J Long","江坤宇","吳念庭","吉力吉撈","林家正","戴培峰"
+  "林安可","邱志呈","林子偉","張育成","李灝宇",
+  "鄭宗哲","J Long","江坤宇","吳念庭"
 ];
 
-const positions = ["","P","C","1B","2B","3B","SS","LF","CF","RF","DH"];
+const positions = ["","C","1B","2B","3B","SS","LF","CF","RF","DH","P"];
 
-let dragged = null;
-let ghost = null;
-let source = null;
+const rosterEl = document.getElementById("roster");
+const lineupEl = document.getElementById("lineup");
+
+let dragging = null;
 
 function createRoster() {
-  const list = document.querySelector("#roster .list");
   rosterNames.forEach(name => {
     const d = document.createElement("div");
     d.className = "item";
     d.textContent = name;
     enableDrag(d, "roster");
-    list.appendChild(d);
+    rosterEl.appendChild(d);
   });
 }
 
 function createLineup() {
-  const l = document.getElementById("lineup");
-  for (let i = 1; i <= 9; i++) {
+  for (let i = 1; i <= 10; i++) {
     const d = document.createElement("div");
-    d.className = "item slot drop";
+    d.className = "item slot";
+    d.dataset.index = i - 1;
     d.innerHTML = `
-      <div class="order">${i}</div>
+      <div class="order">${i === 10 ? "P" : i}</div>
       <div class="name"></div>
       <select>${positions.map(p=>`<option>${p}</option>`).join("")}</select>
     `;
-    enableSlotDrag(d);
-    l.appendChild(d);
+    enableDrag(d, "lineup");
+    lineupEl.appendChild(d);
   }
 }
 
-function enableDrag(el, from) {
+function enableDrag(el, type) {
   el.addEventListener("pointerdown", e => {
-    dragged = el;
-    source = from;
-
-    ghost = el.cloneNode(true);
-    ghost.className = "ghost";
-    document.body.appendChild(ghost);
-    moveGhost(e);
-
+    dragging = { el, type };
+    el.classList.add("dragging");
     el.setPointerCapture(e.pointerId);
   });
 
-  el.addEventListener("pointermove", e => ghost && moveGhost(e));
-  el.addEventListener("pointerup", e => handleDrop(e));
-}
+  el.addEventListener("pointerup", e => {
+    if (!dragging) return;
 
-function enableSlotDrag(slot) {
-  const nameBox = slot.querySelector(".name");
-  slot.addEventListener("pointerdown", e => {
-    if (!nameBox.textContent) return;
-
-    dragged = document.createElement("div");
-    dragged.textContent = nameBox.textContent;
-    source = slot;
-
-    ghost = dragged.cloneNode(true);
-    ghost.className = "ghost";
-    document.body.appendChild(ghost);
-    moveGhost(e);
-
-    nameBox.textContent = "";
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    handleDrop(target);
+    dragging.el.classList.remove("dragging");
+    dragging = null;
   });
-
-  slot.addEventListener("pointermove", e => ghost && moveGhost(e));
-  slot.addEventListener("pointerup", e => handleDrop(e));
 }
 
-function moveGhost(e) {
-  ghost.style.left = e.clientX + "px";
-  ghost.style.top = e.clientY + "px";
-}
+function handleDrop(target) {
+  if (!target) return;
 
-function handleDrop(e) {
-  if (!dragged) return;
+  // roster → lineup
+  if (dragging.type === "roster") {
+    const slot = target.closest(".slot");
+    if (!slot) return;
+    const nameBox = slot.querySelector(".name");
+    if (nameBox.textContent) return;
 
-  const target = document.elementFromPoint(e.clientX, e.clientY);
-  const drop = target?.closest(".drop");
-
-  if (!drop) {
-    restore();
-    cleanup();
-    return;
+    nameBox.textContent = dragging.el.textContent;
+    dragging.el.remove();
   }
 
-  // 丟回 roster
-  if (drop.id === "roster") {
-    document.querySelector("#roster .list").appendChild(makeRosterItem(dragged.textContent));
-    cleanup();
-    return;
-  }
+  // lineup → roster
+  else {
+    if (target.closest(".roster")) {
+      const name = dragging.el.querySelector(".name").textContent;
+      if (!name) return;
 
-  const nameBox = drop.querySelector(".name");
-  if (!nameBox) return;
+      const d = document.createElement("div");
+      d.className = "item";
+      d.textContent = name;
+      enableDrag(d, "roster");
+      rosterEl.appendChild(d);
 
-  if (nameBox.textContent) {
-    const temp = nameBox.textContent;
-    nameBox.textContent = dragged.textContent;
-    dragged.textContent = temp;
-
-    if (source === "roster") {
-      document.querySelector("#roster .list").appendChild(makeRosterItem(dragged.textContent));
+      dragging.el.querySelector(".name").textContent = "";
     }
-  } else {
-    nameBox.textContent = dragged.textContent;
+
+    // lineup 插隊排序
+    const targetSlot = target.closest(".slot");
+    if (targetSlot && targetSlot !== dragging.el) {
+      const slots = [...lineupEl.querySelectorAll(".slot")];
+      const from = slots.indexOf(dragging.el);
+      const to = slots.indexOf(targetSlot);
+
+      const moving = dragging.el.querySelector(".name").textContent;
+      if (!moving) return;
+
+      if (from < to) {
+        for (let i = from; i < to; i++) {
+          slots[i].querySelector(".name").textContent =
+            slots[i+1].querySelector(".name").textContent;
+        }
+      } else {
+        for (let i = from; i > to; i--) {
+          slots[i].querySelector(".name").textContent =
+            slots[i-1].querySelector(".name").textContent;
+        }
+      }
+      targetSlot.querySelector(".name").textContent = moving;
+      dragging.el.querySelector(".name").textContent = "";
+    }
   }
-
-  cleanup();
-}
-
-function makeRosterItem(name) {
-  const d = document.createElement("div");
-  d.className = "item";
-  d.textContent = name;
-  enableDrag(d, "roster");
-  return d;
-}
-
-function restore() {
-  if (source && source.classList?.contains("slot")) {
-    source.querySelector(".name").textContent = dragged.textContent;
-  }
-}
-
-function cleanup() {
-  ghost && ghost.remove();
-  ghost = null;
-  dragged = null;
-  source = null;
 }
 
 createRoster();
 createLineup();
 </script>
-
 </body>
 </html>
