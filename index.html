@@ -78,10 +78,30 @@ select {
   border-radius: 6px;
   padding: 4px;
 }
+
+.topbar {
+  position: fixed;
+  top: 4px;
+  right: 8px;
+  z-index: 10;
+}
+
+button {
+  background: #a00;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}
 </style>
 </head>
 
 <body>
+<div class="topbar">
+  <button onclick="clearAll()">CLEAR</button>
+</div>
+
 <div class="container">
   <div class="roster" id="roster">
     <div class="title">Roster</div>
@@ -93,10 +113,14 @@ select {
 </div>
 
 <script>
+const STORAGE_KEY = "baseball_lineup_v1";
+
 const rosterNames = [
   "陳晨威","陳傑憲","S Fairchild","柯敬賢","宋晟睿",
   "林安可","邱志呈","林子偉","張育成","李灝宇",
-  "鄭宗哲","J Long","江坤宇","吳念庭"
+  "鄭宗哲","J Long","江坤宇","吳念庭",
+  "張政禹","王博玄"
+  "吉力吉撈 鞏冠","林家正","戴培峰",
 ];
 
 const positions = ["","C","1B","2B","3B","SS","LF","CF","RF","DH","P"];
@@ -105,6 +129,47 @@ const rosterEl = document.getElementById("roster");
 const lineupEl = document.getElementById("lineup");
 
 let dragging = null;
+
+function saveState() {
+  const roster = [...rosterEl.querySelectorAll(".item")]
+    .filter(i => !i.classList.contains("slot"))
+    .map(i => i.textContent);
+
+  const lineup = [...lineupEl.querySelectorAll(".slot")].map(slot => ({
+    name: slot.querySelector(".name").textContent,
+    pos: slot.querySelector("select").value
+  }));
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ roster, lineup }));
+}
+
+function loadState() {
+  const data = localStorage.getItem(STORAGE_KEY);
+  if (!data) return false;
+
+  const state = JSON.parse(data);
+  state.roster.forEach(name => {
+    const d = document.createElement("div");
+    d.className = "item";
+    d.textContent = name;
+    enableDrag(d, "roster");
+    rosterEl.appendChild(d);
+  });
+
+  const slots = lineupEl.querySelectorAll(".slot");
+  state.lineup.forEach((s, i) => {
+    if (!slots[i]) return;
+    slots[i].querySelector(".name").textContent = s.name;
+    slots[i].querySelector("select").value = s.pos;
+  });
+
+  return true;
+}
+
+function clearAll() {
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
 
 function createRoster() {
   rosterNames.forEach(name => {
@@ -120,13 +185,14 @@ function createLineup() {
   for (let i = 1; i <= 10; i++) {
     const d = document.createElement("div");
     d.className = "item slot";
-    d.dataset.index = i - 1;
     d.innerHTML = `
       <div class="order">${i === 10 ? "P" : i}</div>
       <div class="name"></div>
       <select>${positions.map(p=>`<option>${p}</option>`).join("")}</select>
     `;
     enableDrag(d, "lineup");
+
+    d.querySelector("select").addEventListener("change", saveState);
     lineupEl.appendChild(d);
   }
 }
@@ -145,6 +211,7 @@ function enableDrag(el, type) {
     handleDrop(target);
     dragging.el.classList.remove("dragging");
     dragging = null;
+    saveState();
   });
 }
 
@@ -175,6 +242,7 @@ function handleDrop(target) {
       rosterEl.appendChild(d);
 
       dragging.el.querySelector(".name").textContent = "";
+      return;
     }
 
     // lineup 插隊排序
@@ -191,21 +259,33 @@ function handleDrop(target) {
         for (let i = from; i < to; i++) {
           slots[i].querySelector(".name").textContent =
             slots[i+1].querySelector(".name").textContent;
+          slots[i].querySelector("select").value =
+            slots[i+1].querySelector("select").value;
         }
       } else {
         for (let i = from; i > to; i--) {
           slots[i].querySelector(".name").textContent =
             slots[i-1].querySelector(".name").textContent;
+          slots[i].querySelector("select").value =
+            slots[i-1].querySelector("select").value;
         }
       }
+
       targetSlot.querySelector(".name").textContent = moving;
+      targetSlot.querySelector("select").value =
+        dragging.el.querySelector("select").value;
+
       dragging.el.querySelector(".name").textContent = "";
+      dragging.el.querySelector("select").value = "";
     }
   }
 }
 
-createRoster();
 createLineup();
+
+if (!loadState()) {
+  createRoster();
+}
 </script>
 </body>
 </html>
