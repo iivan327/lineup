@@ -2,30 +2,84 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>WBC Pitch Count</title>
+
 <style>
-  table { border-collapse: collapse; }
-  th, td {
-    border: 1px solid #444;
-    padding: 6px;
-    text-align: center;
-    min-width: 70px;
-  }
-  th:first-child, td:first-child {
-    min-width: 120px;
-    text-align: left;
-  }
-  input {
-    width: 50px;
-    text-align: center;
-  }
-  .blocked {
-    background: #eee;
-    color: #999;
-    font-weight: bold;
-  }
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f2f2f7;
+}
+
+h3 {
+  margin: 6px 0;
+  text-align: center;
+  font-size: 16px;
+}
+
+table {
+  width: 100%;
+  height: calc(100vh - 36px);
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: white;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  text-align: center;
+  padding: 0;
+  font-size: 13px;
+}
+
+thead th {
+  background: #1c1c1e;
+  color: white;
+  font-weight: 600;
+}
+
+th:first-child, td:first-child {
+  width: 28%;
+  text-align: left;
+  padding-left: 6px;
+  font-weight: 500;
+}
+
+tbody tr:nth-child(odd) {
+  background: #fafafa;
+}
+
+tbody tr:nth-child(even) {
+  background: #f0f0f5;
+}
+
+input {
+  width: 90%;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  text-align: center;
+  font-size: 14px;
+  background: white;
+}
+
+input:focus {
+  outline: none;
+  border-color: #007aff;
+  background: #eef5ff;
+}
+
+.blocked {
+  background: #e5e5ea;
+  color: #8e8e93;
+  font-weight: 700;
+}
 </style>
 </head>
+
 <body>
 
 <h3>WBC Pitch Count</h3>
@@ -58,8 +112,9 @@ pitchers.forEach((name, r) => {
   for (let d = 0; d < days; d++) {
     const td = document.createElement("td");
     const input = document.createElement("input");
-    input.type = "number";
-    input.min = 0;
+    input.type = "text";
+    input.inputMode = "numeric";
+    input.pattern = "[0-9]*";
     input.dataset.row = r;
     input.dataset.day = d;
     input.addEventListener("input", recalc);
@@ -70,7 +125,6 @@ pitchers.forEach((name, r) => {
 });
 
 function recalc() {
-  // reset
   document.querySelectorAll("td").forEach(td => {
     td.classList.remove("blocked");
     const input = td.querySelector("input");
@@ -89,22 +143,9 @@ function recalc() {
       const val = Number(input.value);
       if (!val) continue;
 
-      // 連兩天出賽 → 下一天 X
-      if (d - lastPlayedDay === 1 && d + 1 < days) {
-        blockCell(r, d + 1);
-      }
-
-      // 30–49 球 → 隔天 X
-      if (val >= 30 && val < 50 && d + 1 < days) {
-        blockCell(r, d + 1);
-      }
-
-      // 50 球以上 → 後面全 X
-      if (val >= 50) {
-        for (let k = d + 1; k < days; k++) {
-          blockCell(r, k);
-        }
-      }
+      if (d - lastPlayedDay === 1 && d + 1 < days) blockCell(r, d + 1);
+      if (val >= 30 && val < 50 && d + 1 < days) blockCell(r, d + 1);
+      if (val >= 50) for (let k = d + 1; k < days; k++) blockCell(r, k);
 
       lastPlayedDay = d;
     }
