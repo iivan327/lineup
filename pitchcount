@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>投手逐場用球數</title>
+<style>
+  table { border-collapse: collapse; }
+  th, td {
+    border: 1px solid #444;
+    padding: 6px;
+    text-align: center;
+    min-width: 70px;
+  }
+  th:first-child, td:first-child {
+    min-width: 120px;
+    text-align: left;
+  }
+  input {
+    width: 50px;
+    text-align: center;
+  }
+  .blocked {
+    background: #eee;
+    color: #999;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h3>投手逐場用球數（WBC 限制）</h3>
+
+<table id="pitchTable">
+  <thead>
+    <tr>
+      <th>投手</th>
+      <th>3/5</th>
+      <th>3/6</th>
+      <th>3/7</th>
+      <th>3/8</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+const pitchers = [
+  "張奕","陳柏毓","鄭浩均","古林睿煬","徐若熙","胡智爲","林凱威","林詩翔",
+  "沙子宸","孫易磊","曾峻岳","張峻瑋","莊陳仲敖","陳冠宇","林昱珉","林維恩"
+];
+
+const days = 4;
+const tbody = document.querySelector("#pitchTable tbody");
+
+pitchers.forEach((name, r) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td>${name}</td>`;
+  for (let d = 0; d < days; d++) {
+    const td = document.createElement("td");
+    const input = document.createElement("input");
+    input.type = "number";
+    input.min = 0;
+    input.dataset.row = r;
+    input.dataset.day = d;
+    input.addEventListener("input", recalc);
+    td.appendChild(input);
+    tr.appendChild(td);
+  }
+  tbody.appendChild(tr);
+});
+
+function recalc() {
+  // reset
+  document.querySelectorAll("td").forEach(td => {
+    td.classList.remove("blocked");
+    const input = td.querySelector("input");
+    if (input) input.disabled = false;
+    if (td.textContent === "X") td.textContent = "";
+  });
+
+  pitchers.forEach((_, r) => {
+    let lastPlayedDay = -10;
+
+    for (let d = 0; d < days; d++) {
+      const cell = getCell(r, d);
+      const input = cell.querySelector("input");
+      if (!input) continue;
+
+      const val = Number(input.value);
+      if (!val) continue;
+
+      // 連兩天出賽 → 下一天 X
+      if (d - lastPlayedDay === 1 && d + 1 < days) {
+        blockCell(r, d + 1);
+      }
+
+      // 30–49 球 → 隔天 X
+      if (val >= 30 && val < 50 && d + 1 < days) {
+        blockCell(r, d + 1);
+      }
+
+      // 50 球以上 → 後面全 X
+      if (val >= 50) {
+        for (let k = d + 1; k < days; k++) {
+          blockCell(r, k);
+        }
+      }
+
+      lastPlayedDay = d;
+    }
+  });
+}
+
+function getCell(r, d) {
+  return tbody.children[r].children[d + 1];
+}
+
+function blockCell(r, d) {
+  const cell = getCell(r, d);
+  if (cell.querySelector("input")) {
+    cell.innerHTML = "X";
+    cell.classList.add("blocked");
+  }
+}
+</script>
+
+</body>
+</html>
