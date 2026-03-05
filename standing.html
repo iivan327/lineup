@@ -8,40 +8,72 @@
 
 body{
 font-family:Arial;
+margin:20px;
+}
+
+.container{
 display:flex;
 gap:40px;
-padding:20px;
+flex-wrap:wrap;
 }
 
 table{
 border-collapse:collapse;
+width:100%;
+max-width:520px;
 }
 
 th,td{
-border:1px solid #aaa;
-padding:6px 10px;
+border:1px solid #bbb;
+padding:8px;
 text-align:center;
 }
 
+tr:nth-child(even){
+background:#f3f6fb;
+}
+
 .score{
-width:40px;
+width:42px;
 text-align:center;
+font-size:16px;
+}
+
+.scorebox{
+display:flex;
+gap:6px;
+justify-content:center;
 }
 
 h2{
 margin-top:0;
 }
 
-.scorebox{
-display:flex;
-gap:4px;
-justify-content:center;
+/* mobile */
+
+@media(max-width:700px){
+
+.container{
+flex-direction:column;
+}
+
+table{
+font-size:15px;
+}
+
+.score{
+width:50px;
+font-size:18px;
+}
+
 }
 
 </style>
 </head>
 
 <body>
+
+<div class="container">
 
 <div>
 
@@ -51,121 +83,32 @@ justify-content:center;
 
 <tr>
 <th>Date</th>
-<th>Team A</th>
+<th>Away</th>
 <th>Score</th>
-<th>Team B</th>
+<th>Home</th>
 </tr>
 
-<tr>
-<td>3/5</td>
-<td>Taiwan</td>
-<td class="scorebox">
-<input class="score" id="g1a">
-<input class="score" id="g1b">
-</td>
-<td>Australia</td>
-</tr>
-
-<tr>
-<td>3/5</td>
-<td>Czech</td>
-<td class="scorebox">
-<input class="score" id="g2a">
-<input class="score" id="g2b">
-</td>
-<td>Korea</td>
-</tr>
-
-<tr>
-<td>3/6</td>
-<td>Australia</td>
-<td class="scorebox">
-<input class="score" id="g3a">
-<input class="score" id="g3b">
-</td>
-<td>Czech</td>
-</tr>
-
-<tr>
-<td>3/6</td>
-<td>Japan</td>
-<td class="scorebox">
-<input class="score" id="g4a">
-<input class="score" id="g4b">
-</td>
-<td>Taiwan</td>
-</tr>
-
-<tr>
-<td>3/7</td>
-<td>Taiwan</td>
-<td class="scorebox">
-<input class="score" id="g5a">
-<input class="score" id="g5b">
-</td>
-<td>Czech</td>
-</tr>
-
-<tr>
-<td>3/7</td>
-<td>Korea</td>
-<td class="scorebox">
-<input class="score" id="g6a">
-<input class="score" id="g6b">
-</td>
-<td>Japan</td>
-</tr>
-
-<tr>
-<td>3/8</td>
-<td>Taiwan</td>
-<td class="scorebox">
-<input class="score" id="g7a">
-<input class="score" id="g7b">
-</td>
-<td>Korea</td>
-</tr>
-
-<tr>
-<td>3/8</td>
-<td>Australia</td>
-<td class="scorebox">
-<input class="score" id="g8a">
-<input class="score" id="g8b">
-</td>
-<td>Japan</td>
-</tr>
-
-<tr>
-<td>3/9</td>
-<td>Korea</td>
-<td class="scorebox">
-<input class="score" id="g9a">
-<input class="score" id="g9b">
-</td>
-<td>Australia</td>
-</tr>
-
-<tr>
-<td>3/9</td>
-<td>Czech</td>
-<td class="scorebox">
-<input class="score" id="g10a">
-<input class="score" id="g10b">
-</td>
-<td>Japan</td>
-</tr>
+<tr><td>3/5</td><td>Taiwan</td><td class="scorebox"><input class="score" id="g1a"><input class="score" id="g1b"></td><td>Australia</td></tr>
+<tr><td>3/5</td><td>Czech</td><td class="scorebox"><input class="score" id="g2a"><input class="score" id="g2b"></td><td>Korea</td></tr>
+<tr><td>3/6</td><td>Australia</td><td class="scorebox"><input class="score" id="g3a"><input class="score" id="g3b"></td><td>Czech</td></tr>
+<tr><td>3/6</td><td>Japan</td><td class="scorebox"><input class="score" id="g4a"><input class="score" id="g4b"></td><td>Taiwan</td></tr>
+<tr><td>3/7</td><td>Taiwan</td><td class="scorebox"><input class="score" id="g5a"><input class="score" id="g5b"></td><td>Czech</td></tr>
+<tr><td>3/7</td><td>Korea</td><td class="scorebox"><input class="score" id="g6a"><input class="score" id="g6b"></td><td>Japan</td></tr>
+<tr><td>3/8</td><td>Taiwan</td><td class="scorebox"><input class="score" id="g7a"><input class="score" id="g7b"></td><td>Korea</td></tr>
+<tr><td>3/8</td><td>Australia</td><td class="scorebox"><input class="score" id="g8a"><input class="score" id="g8b"></td><td>Japan</td></tr>
+<tr><td>3/9</td><td>Korea</td><td class="scorebox"><input class="score" id="g9a"><input class="score" id="g9b"></td><td>Australia</td></tr>
+<tr><td>3/9</td><td>Czech</td><td class="scorebox"><input class="score" id="g10a"><input class="score" id="g10b"></td><td>Japan</td></tr>
 
 </table>
 
 </div>
+
 
 <div>
 
 <h2>Standings</h2>
 
 <table id="standings">
-
 <tr>
 <th>Team</th>
 <th>G</th>
@@ -174,20 +117,22 @@ justify-content:center;
 <th>RA</th>
 <th>Win%</th>
 </tr>
-
 </table>
 
 </div>
 
+</div>
+
+
 <script>
 
-const teams=["Australia","Czech","Korea","Japan","Taiwan"]
+const teams=["Taiwan","Australia","Czech","Korea","Japan"]
 
 const games=[
 ["Taiwan","Australia","g1a","g1b"],
 ["Czech","Korea","g2a","g2b"],
 ["Australia","Czech","g3a","g3b"],
-["Taiwan","Japan","g4a","g4b"],
+["Japan","Taiwan","g4a","g4b"],
 ["Taiwan","Czech","g5a","g5b"],
 ["Korea","Japan","g6a","g6b"],
 ["Taiwan","Korea","g7a","g7b"],
@@ -197,11 +142,15 @@ const games=[
 ]
 
 function save(){
+
 let data={}
+
 document.querySelectorAll(".score").forEach(i=>{
 data[i.id]=i.value
 })
+
 localStorage.setItem("wbc_scores",JSON.stringify(data))
+
 }
 
 function load(){
@@ -211,9 +160,10 @@ let data=JSON.parse(localStorage.getItem("wbc_scores"))
 if(!data)return
 
 for(let k in data){
-if(document.getElementById(k)){
+
+if(document.getElementById(k))
 document.getElementById(k).value=data[k]
-}
+
 }
 
 }
@@ -221,9 +171,11 @@ document.getElementById(k).value=data[k]
 function calculate(){
 
 let stats={}
+let h2h={}
 
 teams.forEach(t=>{
 stats[t]={g:0,w:0,l:0,ra:0}
+h2h[t]={}
 })
 
 games.forEach(g=>{
@@ -242,12 +194,22 @@ stats[t2].g++
 stats[t1].ra+=s2
 stats[t2].ra+=s1
 
+if(!h2h[t1][t2])h2h[t1][t2]={w:0,l:0,ra:0}
+if(!h2h[t2][t1])h2h[t2][t1]={w:0,l:0,ra:0}
+
+h2h[t1][t2].ra+=s2
+h2h[t2][t1].ra+=s1
+
 if(s1>s2){
 stats[t1].w++
 stats[t2].l++
+h2h[t1][t2].w++
+h2h[t2][t1].l++
 }else{
 stats[t2].w++
 stats[t1].l++
+h2h[t2][t1].w++
+h2h[t1][t2].l++
 }
 
 })
@@ -258,7 +220,25 @@ let pct=s.g? s.w/s.g:0
 return {team:t,...s,pct}
 })
 
-arr.sort((a,b)=>b.pct-a.pct)
+arr.sort((a,b)=>{
+
+if(b.pct!==a.pct)return b.pct-a.pct
+
+let a_vs_b=h2h[a.team]?.[b.team]
+let b_vs_a=h2h[b.team]?.[a.team]
+
+if(a_vs_b && (a_vs_b.w+b_vs_a.w)>0){
+
+if(a_vs_b.w>b_vs_a.w)return -1
+if(b_vs_a.w>a_vs_b.w)return 1
+
+if(a_vs_b.ra!==b_vs_a.ra)return a_vs_b.ra-b_vs_a.ra
+
+}
+
+return a.ra-b.ra
+
+})
 
 let table=document.getElementById("standings")
 
