@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>WBC Pool C Tracker</title>
+<style>
+body{
+    font-family: Arial;
+    display:flex;
+    gap:40px;
+    padding:20px;
+}
+
+table{
+    border-collapse:collapse;
+}
+
+th,td{
+    border:1px solid #aaa;
+    padding:6px 10px;
+    text-align:center;
+}
+
+input{
+    width:40px;
+}
+
+h2{
+    margin-top:0;
+}
+</style>
+</head>
+
+<body>
+
+<div>
+<h2>Pool C Games</h2>
+
+<table id="games">
+<tr>
+<th>Date</th>
+<th>Team A</th>
+<th></th>
+<th>Team B</th>
+</tr>
+
+<tr>
+<td>3/5</td>
+<td>Australia</td>
+<td><input class="score" data-team="Australia"><input class="score" data-team="Czech"></td>
+<td>Czech</td>
+</tr>
+
+<tr>
+<td>3/5</td>
+<td>Korea</td>
+<td><input class="score" data-team="Korea"><input class="score" data-team="Japan"></td>
+<td>Japan</td>
+</tr>
+
+<tr>
+<td>3/6</td>
+<td>Australia</td>
+<td><input class="score" data-team="Australia"><input class="score" data-team="Korea"></td>
+<td>Korea</td>
+</tr>
+
+<tr>
+<td>3/6</td>
+<td>Czech</td>
+<td><input class="score" data-team="Czech"><input class="score" data-team="Japan"></td>
+<td>Japan</td>
+</tr>
+
+<tr>
+<td>3/7</td>
+<td>Korea</td>
+<td><input class="score" data-team="Korea"><input class="score" data-team="Czech"></td>
+<td>Czech</td>
+</tr>
+
+<tr>
+<td>3/7</td>
+<td>Japan</td>
+<td><input class="score" data-team="Japan"><input class="score" data-team="Australia"></td>
+<td>Australia</td>
+</tr>
+
+<tr>
+<td>3/8</td>
+<td>Australia</td>
+<td><input class="score" data-team="Australia"><input class="score" data-team="Japan"></td>
+<td>Japan</td>
+</tr>
+
+<tr>
+<td>3/8</td>
+<td>Czech</td>
+<td><input class="score" data-team="Czech"><input class="score" data-team="Korea"></td>
+<td>Korea</td>
+</tr>
+
+<tr>
+<td>3/9</td>
+<td>Australia</td>
+<td><input class="score" data-team="Australia"><input class="score" data-team="Czech"></td>
+<td>Czech</td>
+</tr>
+
+<tr>
+<td>3/9</td>
+<td>Japan</td>
+<td><input class="score" data-team="Japan"><input class="score" data-team="Korea"></td>
+<td>Korea</td>
+</tr>
+
+</table>
+</div>
+
+<div>
+<h2>Standings</h2>
+
+<table id="standings">
+<tr>
+<th>Team</th>
+<th>G</th>
+<th>W</th>
+<th>L</th>
+<th>RA</th>
+<th>Win%</th>
+</tr>
+</table>
+
+</div>
+
+<script>
+
+const teams=["Australia","Czech","Korea","Japan"]
+
+function calculate(){
+
+let stats={}
+
+teams.forEach(t=>{
+stats[t]={g:0,w:0,l:0,ra:0}
+})
+
+const rows=document.querySelectorAll("#games tr")
+
+rows.forEach((row,i)=>{
+if(i==0)return
+
+const inputs=row.querySelectorAll("input")
+
+let s1=parseInt(inputs[0].value)
+let s2=parseInt(inputs[1].value)
+
+if(isNaN(s1)||isNaN(s2))return
+
+let team1=inputs[0].dataset.team
+let team2=inputs[1].dataset.team
+
+stats[team1].g++
+stats[team2].g++
+
+stats[team1].ra+=s2
+stats[team2].ra+=s1
+
+if(s1>s2){
+stats[team1].w++
+stats[team2].l++
+}else{
+stats[team2].w++
+stats[team1].l++
+}
+
+})
+
+let arr=teams.map(t=>{
+let s=stats[t]
+let pct=s.g? (s.w/s.g):0
+return {team:t,...s,pct}
+})
+
+arr.sort((a,b)=>b.pct-a.pct)
+
+let table=document.getElementById("standings")
+
+table.innerHTML=`
+<tr>
+<th>Team</th>
+<th>G</th>
+<th>W</th>
+<th>L</th>
+<th>RA</th>
+<th>Win%</th>
+</tr>
+`
+
+arr.forEach(t=>{
+table.innerHTML+=`
+<tr>
+<td>${t.team}</td>
+<td>${t.g}</td>
+<td>${t.w}</td>
+<td>${t.l}</td>
+<td>${t.ra}</td>
+<td>${t.pct.toFixed(3)}</td>
+</tr>
+`
+})
+
+}
+
+document.querySelectorAll("input").forEach(i=>{
+i.addEventListener("input",calculate)
+})
+
+</script>
+
+</body>
+</html>
