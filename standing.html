@@ -2,25 +2,26 @@
 <html>
 <head>
 <meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>WBC Pool C Tracker</title>
 
 <style>
 
 body{
 font-family:Arial;
-margin:20px;
+margin:15px;
 }
 
 .container{
-display:flex;
-gap:40px;
-flex-wrap:wrap;
+max-width:420px;
+margin:auto;
 }
 
 table{
 border-collapse:collapse;
 width:100%;
-max-width:520px;
 }
 
 th,td{
@@ -34,38 +35,19 @@ background:#f3f6fb;
 }
 
 .score{
-width:42px;
+width:40px;
 text-align:center;
 font-size:16px;
 }
 
 .scorebox{
 display:flex;
-gap:6px;
 justify-content:center;
+gap:6px;
 }
 
 h2{
-margin-top:0;
-}
-
-/* mobile */
-
-@media(max-width:700px){
-
-.container{
-flex-direction:column;
-}
-
-table{
-font-size:15px;
-}
-
-.score{
-width:50px;
-font-size:18px;
-}
-
+margin-top:10px;
 }
 
 </style>
@@ -74,8 +56,6 @@ font-size:18px;
 <body>
 
 <div class="container">
-
-<div>
 
 <h2>Pool C Games</h2>
 
@@ -88,25 +68,110 @@ font-size:18px;
 <th>Home</th>
 </tr>
 
-<tr><td>3/5</td><td>Taiwan</td><td class="scorebox"><input class="score" id="g1a"><input class="score" id="g1b"></td><td>Australia</td></tr>
-<tr><td>3/5</td><td>Czech</td><td class="scorebox"><input class="score" id="g2a"><input class="score" id="g2b"></td><td>Korea</td></tr>
-<tr><td>3/6</td><td>Australia</td><td class="scorebox"><input class="score" id="g3a"><input class="score" id="g3b"></td><td>Czech</td></tr>
-<tr><td>3/6</td><td>Japan</td><td class="scorebox"><input class="score" id="g4a"><input class="score" id="g4b"></td><td>Taiwan</td></tr>
-<tr><td>3/7</td><td>Taiwan</td><td class="scorebox"><input class="score" id="g5a"><input class="score" id="g5b"></td><td>Czech</td></tr>
-<tr><td>3/7</td><td>Korea</td><td class="scorebox"><input class="score" id="g6a"><input class="score" id="g6b"></td><td>Japan</td></tr>
-<tr><td>3/8</td><td>Taiwan</td><td class="scorebox"><input class="score" id="g7a"><input class="score" id="g7b"></td><td>Korea</td></tr>
-<tr><td>3/8</td><td>Australia</td><td class="scorebox"><input class="score" id="g8a"><input class="score" id="g8b"></td><td>Japan</td></tr>
-<tr><td>3/9</td><td>Korea</td><td class="scorebox"><input class="score" id="g9a"><input class="score" id="g9b"></td><td>Australia</td></tr>
-<tr><td>3/9</td><td>Czech</td><td class="scorebox"><input class="score" id="g10a"><input class="score" id="g10b"></td><td>Japan</td></tr>
+<tr>
+<td>3/5</td>
+<td>Taiwan</td>
+<td class="scorebox">
+<input class="score" id="g1a">
+<input class="score" id="g1b">
+</td>
+<td>Australia</td>
+</tr>
+
+<tr>
+<td>3/5</td>
+<td>Czech</td>
+<td class="scorebox">
+<input class="score" id="g2a">
+<input class="score" id="g2b">
+</td>
+<td>Korea</td>
+</tr>
+
+<tr>
+<td>3/6</td>
+<td>Australia</td>
+<td class="scorebox">
+<input class="score" id="g3a">
+<input class="score" id="g3b">
+</td>
+<td>Czech</td>
+</tr>
+
+<tr>
+<td>3/6</td>
+<td>Japan</td>
+<td class="scorebox">
+<input class="score" id="g4a">
+<input class="score" id="g4b">
+</td>
+<td>Taiwan</td>
+</tr>
+
+<tr>
+<td>3/7</td>
+<td>Taiwan</td>
+<td class="scorebox">
+<input class="score" id="g5a">
+<input class="score" id="g5b">
+</td>
+<td>Czech</td>
+</tr>
+
+<tr>
+<td>3/7</td>
+<td>Korea</td>
+<td class="scorebox">
+<input class="score" id="g6a">
+<input class="score" id="g6b">
+</td>
+<td>Japan</td>
+</tr>
+
+<tr>
+<td>3/8</td>
+<td>Taiwan</td>
+<td class="scorebox">
+<input class="score" id="g7a">
+<input class="score" id="g7b">
+</td>
+<td>Korea</td>
+</tr>
+
+<tr>
+<td>3/8</td>
+<td>Australia</td>
+<td class="scorebox">
+<input class="score" id="g8a">
+<input class="score" id="g8b">
+</td>
+<td>Japan</td>
+</tr>
+
+<tr>
+<td>3/9</td>
+<td>Korea</td>
+<td class="scorebox">
+<input class="score" id="g9a">
+<input class="score" id="g9b">
+</td>
+<td>Australia</td>
+</tr>
+
+<tr>
+<td>3/9</td>
+<td>Czech</td>
+<td class="scorebox">
+<input class="score" id="g10a">
+<input class="score" id="g10b">
+</td>
+<td>Japan</td>
+</tr>
 
 </table>
 
-</div>
 
-
-<div>
-
-<h2>Standings</h2>
+<h2 style="margin-top:25px;">Standings</h2>
 
 <table id="standings">
 <tr>
@@ -118,8 +183,6 @@ font-size:18px;
 <th>Win%</th>
 </tr>
 </table>
-
-</div>
 
 </div>
 
@@ -141,6 +204,7 @@ const games=[
 ["Czech","Japan","g10a","g10b"]
 ]
 
+
 function save(){
 
 let data={}
@@ -152,6 +216,7 @@ data[i.id]=i.value
 localStorage.setItem("wbc_scores",JSON.stringify(data))
 
 }
+
 
 function load(){
 
@@ -167,6 +232,7 @@ document.getElementById(k).value=data[k]
 }
 
 }
+
 
 function calculate(){
 
@@ -194,11 +260,8 @@ stats[t2].g++
 stats[t1].ra+=s2
 stats[t2].ra+=s1
 
-if(!h2h[t1][t2])h2h[t1][t2]={w:0,l:0,ra:0}
-if(!h2h[t2][t1])h2h[t2][t1]={w:0,l:0,ra:0}
-
-h2h[t1][t2].ra+=s2
-h2h[t2][t1].ra+=s1
+if(!h2h[t1][t2])h2h[t1][t2]={w:0,l:0}
+if(!h2h[t2][t1])h2h[t2][t1]={w:0,l:0}
 
 if(s1>s2){
 stats[t1].w++
@@ -214,21 +277,20 @@ h2h[t1][t2].l++
 
 })
 
+
 let arr=teams.map(t=>{
 let s=stats[t]
 let pct=s.g? s.w/s.g:0
 return {team:t,...s,pct}
 })
 
+
 arr.sort((a,b)=>{
 
-// 1 勝場
 if(b.w!==a.w) return b.w-a.w
 
-// 找同勝場隊伍
 let same = arr.filter(t=>t.w===a.w)
 
-// 2 只有兩隊同勝場 → 比對戰
 if(same.length===2){
 
 let a_vs_b=h2h[a.team]?.[b.team]
@@ -243,10 +305,10 @@ if(b_vs_a.w>a_vs_b.w) return 1
 
 }
 
-// 3 三隊以上 → 比失分
 return a.ra-b.ra
 
 })
+
 
 let table=document.getElementById("standings")
 
@@ -278,12 +340,14 @@ table.innerHTML+=`
 
 }
 
+
 document.querySelectorAll(".score").forEach(i=>{
 i.addEventListener("input",()=>{
 save()
 calculate()
 })
 })
+
 
 load()
 calculate()
